@@ -8,9 +8,14 @@
                 yield return str;
             else
             {
+                var usedChars = new HashSet<char>();
                 foreach (var c in str)
                 {
-                    var remaining = new string(str.Where(x => x != c || str.Count(ch => ch == c) > 1).ToArray());
+                    // Skip characters we've already processed at this level to prevent duplicates
+                    if (usedChars.Contains(c)) continue;
+                    usedChars.Add(c);
+
+                    var remaining = new string(str.Where((x, i) => i != str.IndexOf(c) || x != c).ToArray());
                     foreach (var permutation in GetPermutations(remaining))
                     {
                         yield return c + permutation;
@@ -24,22 +29,17 @@
             if (a < 0 || b < 0 || c < 0)
                 return "Invalid input: a, b, and c must be non-negative integers.";
 
-            if (a > int.MaxValue || b > int.MaxValue || c > int.MaxValue)
-                return "Invalid input: a, b, or c is too large.";
-
             if (a == 0 && b == c) return $"YES\n0 {b}";
             if (b == 0 && a == c) return $"YES\n{a} 0";
 
             var aPerms = GetPermutations(a.ToString())
                 .Select(x => int.Parse(x))
                 .Distinct()
-                .Where(x => x.ToString() == x.ToString().TrimStart('0'))
                 .OrderBy(x => x);
 
             var bPerms = GetPermutations(b.ToString())
                 .Select(x => int.Parse(x))
                 .Distinct()
-                .Where(x => x.ToString() == x.ToString().TrimStart('0'))
                 .OrderBy(x => x);
 
             foreach (var x in aPerms)
